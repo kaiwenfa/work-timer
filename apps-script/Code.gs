@@ -46,3 +46,13 @@ function doPost(e) {
     try { lock.releaseLock(); } catch (e2) {}
   }
 }
+
+// Opening the URL in a browser shows a check message; the app calls ?format=json to learn the Sheet's link.
+function doGet(e) {
+  const params = (e && e.parameter) || {};
+  if (params.format === 'json') {
+    return jsonOut({ ok: true, sheetUrl: SpreadsheetApp.getActiveSpreadsheet().getUrl() });
+  }
+  return ContentService.createTextOutput('✓ Work Timer sync is working. Paste this URL into the app\'s settings.')
+    .setMimeType(ContentService.MimeType.TEXT);
+}

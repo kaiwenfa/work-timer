@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStore } from '../js/store.js';
-import { syncPending, toPayload } from '../js/sync.js';
+import { syncPending, toPayload, fetchSheetLink } from '../js/sync.js';
 
 function fakeStorage() {
   const m = new Map();
@@ -120,4 +120,18 @@ test('skips fetch when url is empty', async () => {
     assert.deepEqual(r, { synced: 0, failed: 0, needsSetup: true });
   }
   assert.equal(calls.length, 0);
+});
+
+test('fetchSheetLink GETs ?format=json and returns the sheet URL', async () => {
+  const { calls, fetchFn } = recorder(() => ({ json: async () => ({ ok: true, sheetUrl: 'https://docs.google.com/spreadsheets/d/X/edit' }) }));
+  const link = await fetchSheetLink('https://x.test/exec', fetchFn);
+  assert.equal(link, 'https://docs.google.com/spreadsheets/d/X/edit');
+  assert.equal(calls[0].url, 'https://x.test/exec?format=json');
+});
+
+test('fetchSheetLink returns null on network error, old script, or non-Google URL', async () => {
+  assert.equal(await fetchSheetLink('https://x.test/exec', async () => { throw new Error('offline'); }), null);
+  assert.equal(await fetchSheetLink('https://x.test/exec', async () => ({ json: async () => { throw new SyntaxError('html'); } })), null);
+  assert.equal(await fetchSheetLink('https://x.test/exec', async () => ({ json: async () => ({ ok: true, sheetUrl: 'https://evil.test/' }) })), null);
+  assert.equal(await fetchSheetLink('', async () => { throw new Error('should not fetch'); }), null);
 });

@@ -17,18 +17,19 @@ function setup() {
   };
   const ctx = vm.createContext({
     SpreadsheetApp: {
-      getActiveSpreadsheet: () => ({ getSheets: () => [sheet] }),
+      getActiveSpreadsheet: () => ({ getSheets: () => [sheet], getUrl: () => 'https://docs.google.com/spreadsheets/d/SHEET123/edit' }),
       flush: () => { calls.flush++; calls.flushRows.push(rows.length); },
     },
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
     ContentService: {
-      MimeType: { JSON: 'JSON' },
+      MimeType: { JSON: 'JSON', TEXT: 'TEXT' },
       createTextOutput: (text) => ({ setMimeType() { return this; }, getContent: () => text }),
     },
   });
   vm.runInContext(code, ctx);
   const post = (body) => JSON.parse(ctx.doPost({ postData: { contents: typeof body === 'string' ? body : JSON.stringify(body) } }).getContent());
-  return { rows, post, calls };
+  const get = (parameter = {}) => ctx.doGet({ parameter }).getContent();
+  return { rows, post, calls, get };
 }
 
 const payload = { id: 'abc', date: '2026-11-19', category: 'Client', start: 1700000000000, end: 1700003600000, hours: 1 };
@@ -75,4 +76,15 @@ test('flush is called after appending a row, and not on duplicates', () => {
   assert.equal(calls.flushRows[0], 2); // flushed after the row was appended
   post(payload);
   assert.equal(calls.flush, 1);
+});
+
+test('doGet without params shows a human-readable working message', () => {
+  const { get, rows } = setup();
+  assert.match(get(), /Work Timer sync is working/);
+  assert.equal(rows.length, 0);
+});
+
+test('doGet?format=json returns the spreadsheet URL', () => {
+  const { get } = setup();
+  assert.deepEqual({ ...JSON.parse(get({ format: 'json' })) }, { ok: true, sheetUrl: 'https://docs.google.com/spreadsheets/d/SHEET123/edit' });
 });

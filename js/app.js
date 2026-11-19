@@ -1,11 +1,12 @@
 import { formatDuration, todayTotalMs } from './time.js';
 import { createStore } from './store.js';
 import { start, stop, setCategory, isOverdue, createTapGuard } from './timer.js';
-import { syncPending } from './sync.js';
+import { syncPending, fetchSheetLink } from './sync.js';
 import { playStart, playStop, hapticTick, burst, setSilentMode } from './feedback.js';
 
 const $ = (id) => document.getElementById(id);
 const app = $('app'), btn = $('btn'), statusEl = $('status'), timeEl = $('time'), todayEl = $('today');
+const sheetBtn = $('openSheet');
 const syncEl = $('sync'), overdueEl = $('overdue'), chipsEl = $('chips'), settingsEl = $('settings');
 
 const store = createStore(window.localStorage);
@@ -54,6 +55,26 @@ function renderSync(settings = store.getSettings()) {
   else { text = '✓ synced'; cls = 'ok'; }
   if (syncEl.textContent !== text) syncEl.textContent = text;
   syncEl.className = cls;
+  const link = settings.sheetUrl && settings.sheetLink;
+  sheetBtn.hidden = !link;
+  if (link && sheetBtn.getAttribute('href') !== link) sheetBtn.href = link;
+}
+
+// Learn the Sheet's link from the script once per sync URL (needs the script's doGet).
+let linkFetching = false;
+async function refreshSheetLink() {
+  const { sheetUrl, sheetLink, sheetLinkFor } = getSettings();
+  if (!sheetUrl || linkFetching || (sheetLink && sheetLinkFor === sheetUrl)) return;
+  linkFetching = true;
+  try {
+    const link = await fetchSheetLink(sheetUrl);
+    if (link && getSettings().sheetUrl === sheetUrl) {
+      guarded(() => store.saveSettings({ sheetLink: link, sheetLinkFor: sheetUrl }), "⚠ Couldn't save — storage full?");
+      render();
+    }
+  } finally {
+    linkFetching = false;
+  }
 }
 
 // Run a store-touching action; on failure show a visible error and re-sync the UI with storage.
@@ -143,8 +164,11 @@ $('silentSound').addEventListener('change', (e) => setSilentMode(e.target.checke
 
 $('closeSettings').addEventListener('click', () => {
   const saved = guarded(() => {
+    const url = $('sheetUrl').value.trim();
+    const prev = store.getSettings();
     store.saveSettings({
-      sheetUrl: $('sheetUrl').value.trim(),
+      ...(url !== prev.sheetUrl ? { sheetLink: '', sheetLinkFor: '' } : {}),
+      sheetUrl: url,
       sound: $('sound').checked,
       silentSound: $('silentSound').checked,
     });
@@ -153,23 +177,28 @@ $('closeSettings').addEventListener('click', () => {
   if (saved) setSilentMode($('silentSound').checked);
   settingsEl.hidden = true;
   render();
-  if (saved) doSync();
+  if (saved) { doSync(); refreshSheetLink(); }
 });
 
-window.addEventListener('online', doSync);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') doSync(); });
+window.addEventListener('online', () => { doSync(); refreshSheetLink(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { doSync(); refreshSheetLink(); } });
 
 setSilentMode(!!getSettings().silentSound);
 try { navigator.storage?.persist?.(); } catch { /* ignore */ }
 render();
 setInterval(render, 250);
 doSync();
+refreshSheetLink();
 
 // First launch: no sheet URL and no data yet -> open settings once.
 try {
   const s = getSettings();
   if (!(s.sheetUrl && s.sheetUrl.trim()) && store.listSessions().length === 0 && !store.getActive()) openSettings();
 } catch { /* storage unavailable: skip */ }
+
+document.addEventListener('touchmove', (e) => {
+  if (!e.target.closest('#settings')) e.preventDefault();
+}, { passive: false });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});

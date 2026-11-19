@@ -40,3 +40,17 @@ export async function syncPending(store, url, fetchFn = fetch) {
   }
   return { synced, failed, needsSetup: false };
 }
+
+// Asks the Apps Script for the Sheet's own link. Returns null if offline, on an old script, or on anything odd.
+export async function fetchSheetLink(url, fetchFn = fetch) {
+  if (typeof url !== 'string' || url.trim() === '') return null;
+  try {
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetchFn(`${url.trim()}${sep}format=json`, { redirect: 'follow' });
+    const data = await res.json();
+    const link = data && data.ok === true && data.sheetUrl;
+    return typeof link === 'string' && link.startsWith('https://docs.google.com/') ? link : null;
+  } catch {
+    return null;
+  }
+}

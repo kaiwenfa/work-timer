@@ -21,6 +21,7 @@ You will make a Google Sheet that collects your sessions, then connect the phone
 6. Click **Authorize access** and choose your Google account.
 7. You will see **"Google hasn't verified this app"**. This is normal: you wrote this script yourself, and Google only checks scripts that are published to others. Click **Advanced**, then **Go to Work Timer (unsafe)** (the project name may differ), then **Allow**.
 8. Copy the **Web app URL**. It ends in `/exec`. Keep it private, and save it somewhere you can reach from your phone (for example, send it to yourself in Notes).
+9. Optional check: open that URL in a browser. You should see **"✓ Work Timer sync is working."** This URL is only for the app to send data to; you never need to open it again.
 
 ## Part 3: Install the app on your iPhone
 
@@ -32,6 +33,8 @@ You will make a Google Sheet that collects your sessions, then connect the phone
 
 Finish a short test session. A row should appear in the first tab of your Sheet within a few seconds, with the header `Date, Category, Start, End, Hours, ID`. If you are offline, sessions are kept on the phone and sent later.
 
+Once the app has reached your script, a **↗ SHEET** button appears at the top right. Tap it to open your Google Sheet.
+
 ## Updating the script later
 
 If `Code.gs` ever changes, do not create a new deployment, because that gives a new URL. Instead:
@@ -42,3 +45,5 @@ If `Code.gs` ever changes, do not create a new deployment, because that gives a 
 4. Under **Version**, choose **New version**, then click **Deploy**.
 
 The URL stays the same, so the app keeps working.
+
+If you see "Script function not found: doGet" when opening the URL, your deployment is running an older copy of the script. Update it with the steps above.

@@ -1,13 +1,15 @@
 :root{--a:#D4FF3A;--b:#FF2E88;--c:#22E6FF}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:#07070c}
+/* Pin the page so iOS can't scroll or rubber-band it; everything fits on one screen. */
+html,body{margin:0;height:100%;background:#07070c;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0}
 body{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none;
   font-family:"JetBrains Mono",ui-monospace,monospace;color:#EDEAF5}
 button{font:inherit;color:inherit;background:none;border:none;padding:0;touch-action:manipulation}
 [hidden]{display:none!important}
 #haptic{position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 
-#app{position:relative;overflow:hidden;min-height:100vh;min-height:100dvh;height:100dvh;display:flex;flex-direction:column;align-items:center;
+#app{position:relative;overflow:hidden;height:100%;display:flex;flex-direction:column;align-items:center;
   padding:calc(env(safe-area-inset-top) + 16px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 24px) calc(env(safe-area-inset-left) + 18px);
   background:#07070c}
 #app::before{content:"";position:absolute;inset:0;pointer-events:none;
@@ -21,6 +23,9 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;touch-ac
 .hdr{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.15em;margin-top:12px;z-index:2}
 #logo{opacity:.55;padding:10px 4px;-webkit-touch-callout:none}
 #sync{font-size:11px;letter-spacing:.1em;padding:10px 4px;opacity:.8;cursor:pointer}
+.hdr-r{display:flex;align-items:center;gap:14px}
+#openSheet{font-size:11px;letter-spacing:.1em;padding:10px 4px;color:var(--c);opacity:.8;text-decoration:none;-webkit-touch-callout:none}
+#openSheet:active{opacity:.4}
 #sync.ok{color:var(--a)}#sync.pending{color:var(--c)}#sync.setup{color:var(--b)}
 .overdue{z-index:2;margin-top:10px;padding:8px 12px;border:1.5px solid var(--b);color:var(--b);font-size:12px;font-weight:800;letter-spacing:.08em;text-shadow:0 0 8px var(--b);text-align:center}
 .status{font-size:14px;font-weight:800;letter-spacing:.25em;text-transform:uppercase;margin-top:6vh;color:var(--c);text-shadow:0 0 8px var(--c);z-index:2;text-align:center}
