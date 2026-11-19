@@ -31,7 +31,9 @@ You will make a Google Sheet that collects your sessions, then connect the phone
 4. **Long-press** the header **SHIFT//LOG** to open settings.
 5. Paste the Web app URL (`https://script.google.com/macros/s/<your-script-id>/exec`) into the sync URL field and save.
 
-Finish a short test session. Within a few seconds a row appears in two tabs: the tab for its category (**Client**, **Personal** or **Employer**) and **Everything**, which collects all sessions. The script creates these tabs the first time it needs them, each with the header `Date, Category, Start, End, Hours, ID`. Don't rename them, or the script will make a fresh tab with the original name. The original "Sheet1" tab is no longer used; you can delete it. If you are offline, sessions are kept on the phone and sent later.
+Finish a short test session. Within a few seconds a row appears in two tabs: the tab for its category (**Client**, **Personal** or **Employer**) and **Everything**, which collects all sessions. The script creates these tabs the first time it needs them, each with the header `Date, Category, Start, End, Hours, ID`. Don't rename them, or the script will make a fresh tab with the original name. The original "Sheet1" tab is no longer used; you can delete it.
+
+A **Summary** tab (the first tab) shows hours per week (weeks start on Monday) and per month, split by category with a total. It is rebuilt from the **Everything** tab after every sync and each time you open the Sheet, so rows you fix or add by hand in **Everything** are counted too. To refresh it right away, use the **Work Timer › Refresh summary** menu. Don't edit the Summary tab itself; it is overwritten each time. If you are offline, sessions are kept on the phone and sent later.
 
 Once the app has reached your script, a **↗ SHEET** button appears at the top right. Tap it to open your Google Sheet.
 
