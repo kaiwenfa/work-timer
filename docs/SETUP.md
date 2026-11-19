@@ -26,12 +26,12 @@ You will make a Google Sheet that collects your sessions, then connect the phone
 ## Part 3: Install the app on your iPhone
 
 1. On your iPhone, open the app's GitHub Pages URL in **Safari**: `https://<your-github-username>.github.io/<your-repo-name>/`
-2. Tap the **Share** button, then **Add to Home Screen**, then **Add**.
+2. Tap the **Share** button, then **Add to Home Screen**, then **Add**. (iOS saves the dark launch screen when you add the app. If you added it before the launch screen existed, delete the home-screen icon and add it again; your data in the Sheet is unaffected, but sessions not yet synced on the phone would be lost, so check it says ✓ synced first.)
 3. Open the app from your home screen.
 4. **Long-press** the header **SHIFT//LOG** to open settings.
 5. Paste the Web app URL (`https://script.google.com/macros/s/<your-script-id>/exec`) into the sync URL field and save.
 
-Finish a short test session. A row should appear in the first tab of your Sheet within a few seconds, with the header `Date, Category, Start, End, Hours, ID`. If you are offline, sessions are kept on the phone and sent later.
+Finish a short test session. Within a few seconds a row appears in two tabs: the tab for its category (**Client**, **Personal** or **Employer**) and **Everything**, which collects all sessions. The script creates these tabs the first time it needs them, each with the header `Date, Category, Start, End, Hours, ID`. Don't rename them, or the script will make a fresh tab with the original name. The original "Sheet1" tab is no longer used; you can delete it. If you are offline, sessions are kept on the phone and sent later.
 
 Once the app has reached your script, a **↗ SHEET** button appears at the top right. Tap it to open your Google Sheet.
 

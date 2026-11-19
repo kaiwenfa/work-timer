@@ -1,5 +1,5 @@
 // Bump CACHE whenever shell files are added/renamed, and add new files to SHELL.
-const CACHE = 'work-timer-v3';
+const CACHE = 'work-timer-v4';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/feedback.js', './js/store.js', './js/sync.js',

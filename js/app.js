@@ -196,6 +196,19 @@ try {
   if (!(s.sheetUrl && s.sheetUrl.trim()) && store.listSessions().length === 0 && !store.getActive()) openSettings();
 } catch { /* storage unavailable: skip */ }
 
+// Fade out the loading screen once the first frame is drawn and fonts are in (or after 800 ms, e.g. offline).
+const loader = $('loader');
+if (loader) {
+  const css = $('fontcss');
+  const cssIn = !css || css.dataset.loaded ? Promise.resolve()
+    : new Promise((r) => { css.addEventListener('load', r); css.addEventListener('error', r); });
+  const fontsIn = cssIn.then(() => (document.fonts ? document.fonts.ready : undefined));
+  Promise.race([fontsIn, new Promise((r) => setTimeout(r, 800))]).then(() => {
+    loader.classList.add('done');
+    setTimeout(() => loader.remove(), 400);
+  });
+}
+
 document.addEventListener('touchmove', (e) => {
   if (!e.target.closest('#settings')) e.preventDefault();
 }, { passive: false });

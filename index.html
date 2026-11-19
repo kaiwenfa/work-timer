@@ -6,6 +6,18 @@
 <meta name="theme-color" content="#07070c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
+<!-- iOS launch screens (dark, icon centered), one per iPhone screen size -->
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1206x2622.png">
+<link rel="apple-touch-startup-image" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1260x2736.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="icons/splash/splash-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="icons/splash/splash-828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="icons/splash/splash-750x1334.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,10 +25,23 @@
 <title>Work Timer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;800&display=swap" id="fontcss" media="print" onload="this.media='all';this.dataset.loaded='1'">
+<style>
+  /* Inline so the first frame is already dark and matches the iOS launch image. */
+  html,body{margin:0;background:#07070c}
+  #loader{position:fixed;inset:0;z-index:50;background:#07070c;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    transition:opacity .35s ease,transform .35s ease;animation:loaderGiveUp 0s 5s forwards}
+  #loader img{width:96px;height:96px} /* same size and spot as the iOS launch image, so the handoff is seamless */
+  #loader .bar{position:absolute;top:calc(50% + 72px);width:96px;height:2px;background:rgba(212,255,58,.15);overflow:hidden}
+  #loader .bar::after{content:"";position:absolute;inset:0;width:40%;background:#D4FF3A;box-shadow:0 0 8px #D4FF3A;animation:loaderSweep .9s ease-in-out infinite}
+  #loader.done{opacity:0;transform:scale(1.04);pointer-events:none}
+  @keyframes loaderSweep{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+  @keyframes loaderGiveUp{to{opacity:0;visibility:hidden}} /* never trap the screen if JS fails */
+</style>
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
+<div id="loader" aria-hidden="true"><img src="icons/icon-512.png" alt=""><div class="bar"></div></div>
 <main id="app">
   <div class="scan"></div>
   <div class="flash"></div>
