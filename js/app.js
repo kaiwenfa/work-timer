@@ -65,19 +65,25 @@ function guarded(fn, message) {
   }
 }
 
+let resyncRequested = false;
 async function doSync() {
-  if (syncing) return;
+  if (syncing) { resyncRequested = true; return; }
   syncing = true;
   try {
-    const { sheetUrl } = store.getSettings();
-    const res = await syncPending(store, sheetUrl);
-    if (res.failed > 0) setNotice('⚠ Sync failed — will retry', true, 3000);
-  } catch (e) {
-    console.error(e);
-    setNotice("⚠ Couldn't save — storage full?", true);
+    do {
+      resyncRequested = false;
+      try {
+        const { sheetUrl } = store.getSettings();
+        const res = await syncPending(store, sheetUrl);
+        if (res.failed > 0) setNotice(`⚠ ${store.pendingSessions().length} pending — sync failed`, true, 3000);
+      } catch (e) {
+        console.error(e);
+        setNotice('⚠ Sync error', true);
+      }
+      render();
+    } while (resyncRequested);
   } finally {
     syncing = false;
-    render();
   }
 }
 
