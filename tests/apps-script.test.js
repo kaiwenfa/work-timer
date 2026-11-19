@@ -7,6 +7,7 @@ const code = fs.readFileSync(new URL('../apps-script/Code.gs', import.meta.url),
 
 function setup() {
   const rows = [];
+  const calls = { flush: 0, flushRows: [] };
   const sheet = {
     getLastRow: () => rows.length,
     getRange: (row, col, numRows, numCols) => ({
@@ -15,7 +16,10 @@ function setup() {
     appendRow: (r) => { rows.push(Array.from(r)); }, // Array.from: arrays made inside vm have another realm's prototype
   };
   const ctx = vm.createContext({
-    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheets: () => [sheet] }) },
+    SpreadsheetApp: {
+      getActiveSpreadsheet: () => ({ getSheets: () => [sheet] }),
+      flush: () => { calls.flush++; calls.flushRows.push(rows.length); },
+    },
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
     ContentService: {
       MimeType: { JSON: 'JSON' },
@@ -24,7 +28,7 @@ function setup() {
   });
   vm.runInContext(code, ctx);
   const post = (body) => JSON.parse(ctx.doPost({ postData: { contents: typeof body === 'string' ? body : JSON.stringify(body) } }).getContent());
-  return { rows, post };
+  return { rows, post, calls };
 }
 
 const payload = { id: 'abc', date: '2026-11-19', category: 'Client', start: 1700000000000, end: 1700003600000, hours: 1 };
@@ -62,4 +66,13 @@ test('missing id returns ok:false', () => {
   const res = post({ ...payload, id: undefined });
   assert.equal(res.ok, false);
   assert.equal(rows.length, 0);
+});
+
+test('flush is called after appending a row, and not on duplicates', () => {
+  const { post, calls } = setup();
+  post(payload);
+  assert.equal(calls.flush, 1);
+  assert.equal(calls.flushRows[0], 2); // flushed after the row was appended
+  post(payload);
+  assert.equal(calls.flush, 1);
 });

@@ -38,6 +38,7 @@ function doPost(e) {
       }
     }
     sheet.appendRow(rowFromPayload(p));
+    SpreadsheetApp.flush();
     return jsonOut({ ok: true, id: p.id, duplicate: false });
   } catch (err) {
     return jsonOut({ ok: false, error: String(err && err.message ? err.message : err) });
