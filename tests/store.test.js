@@ -61,3 +61,22 @@ test('corrupt JSON in wt.sessions yields [] instead of throwing', () => {
   assert.deepEqual(store.listSessions(), []);
   assert.deepEqual(store.pendingSessions(), []);
 });
+
+test('addSession after corruption preserves the raw value in wt.sessions.corrupt', () => {
+  const storage = fakeStorage();
+  storage.setItem('wt.sessions', '{not json');
+  const store = createStore(storage);
+  store.addSession(session('s2'));
+  assert.equal(storage.getItem('wt.sessions.corrupt'), '{not json');
+  assert.deepEqual(store.listSessions().map((s) => s.id), ['s2']);
+});
+
+test('setItem failure propagates and leaves stored sessions unchanged', () => {
+  const storage = fakeStorage();
+  const store = createStore(storage);
+  store.addSession(session('s1'));
+  const before = storage.getItem('wt.sessions');
+  storage.setItem = () => { throw new Error('QuotaExceededError'); };
+  assert.throws(() => store.addSession(session('s2')), /QuotaExceeded/);
+  assert.equal(storage.getItem('wt.sessions'), before);
+});
