@@ -160,9 +160,16 @@ window.addEventListener('online', doSync);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') doSync(); });
 
 setSilentMode(!!getSettings().silentSound);
+try { navigator.storage?.persist?.(); } catch { /* ignore */ }
 render();
 setInterval(render, 250);
 doSync();
+
+// First launch: no sheet URL and no data yet -> open settings once.
+try {
+  const s = getSettings();
+  if (!(s.sheetUrl && s.sheetUrl.trim()) && store.listSessions().length === 0 && !store.getActive()) openSettings();
+} catch { /* storage unavailable: skip */ }
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
