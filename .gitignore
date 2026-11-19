@@ -6,3 +6,7 @@ node_modules/
 .clasp.json
 apps-script/.clasp.json
 apps-script/.deployment-id
+.claude/settings.local.json
+
+# local-only notes and exported Claude conversations (may contain private IDs)
+.private/
