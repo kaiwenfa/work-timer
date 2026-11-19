@@ -68,3 +68,12 @@ test('stop without active throws', () => {
   const store = createStore(fakeStorage());
   assert.throws(() => stop(store, 1000));
 });
+
+test('stop clamps negative duration when the clock moved backwards', () => {
+  const store = createStore(fakeStorage());
+  const T = new Date(2026, 10, 19, 12, 0).getTime();
+  start(store, 'Client', T);
+  const s = stop(store, T - 60_000);
+  assert.equal(s.hours, 0);
+  assert.equal(s.end, s.start);
+});

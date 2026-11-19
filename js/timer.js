@@ -12,13 +12,14 @@ export function start(store, category, nowMs) {
 export function stop(store, nowMs) {
   const active = store.getActive();
   if (!active) throw new Error('No active session');
+  const end = Math.max(nowMs, active.start); // clock moved backwards: never log negative time
   const session = {
     id: active.id,
     category: active.category,
     start: active.start,
-    end: nowMs,
+    end,
     date: localDate(active.start),
-    hours: hoursBetween(active.start, nowMs),
+    hours: hoursBetween(active.start, end),
     synced: false,
   };
   // Write the session first so a failed write never loses the running session.
