@@ -1,4 +1,5 @@
-const CACHE = 'work-timer-v1';
+// Bump CACHE whenever shell files are added/renamed, and add new files to SHELL.
+const CACHE = 'work-timer-v2';
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/feedback.js', './js/store.js', './js/sync.js',
@@ -17,23 +18,24 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+const NETWORK_TIMEOUT_MS = 2500;
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   if (new URL(req.url).origin !== self.location.origin) return;
-  e.respondWith(
-    fetch(req)
-      .then((res) => {
-        if (res && res.ok) {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-        }
-        return res;
-      })
-      .catch(() =>
-        caches.match(req).then((hit) =>
-          hit || (req.mode === 'navigate' ? caches.match('./index.html') : Response.error())
-        )
-      )
+
+  const network = fetch(req);
+  // Always refresh the cache when the network eventually answers, even after a timeout.
+  e.waitUntil(
+    network
+      .then((res) => (res && res.ok ? caches.open(CACHE).then((c) => c.put(req, res.clone())) : undefined))
+      .catch(() => {})
   );
+  const cached = () =>
+    caches.match(req).then((hit) => hit || (req.mode === 'navigate' ? caches.match('./index.html') : undefined));
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(cached()), NETWORK_TIMEOUT_MS));
+  const offline = network.catch(() => cached().then((hit) => hit || Response.error()));
+  // Network wins if fast; after the timeout a cached copy wins; with no cache, keep waiting for the network.
+  e.respondWith(Promise.race([offline, timeout.then((hit) => hit || offline)]));
 });
