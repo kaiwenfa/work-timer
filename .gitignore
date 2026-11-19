@@ -1,3 +1,8 @@
 .superpowers/
 .DS_Store
 node_modules/
+
+# clasp: local-only, holds the script and deployment IDs (never commit)
+.clasp.json
+apps-script/.clasp.json
+apps-script/.deployment-id

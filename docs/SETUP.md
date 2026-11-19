@@ -49,3 +49,22 @@ If `Code.gs` ever changes, do not create a new deployment, because that gives a 
 The URL stays the same, so the app keeps working.
 
 If you see "Script function not found: doGet" when opening the URL, your deployment is running an older copy of the script. Update it with the steps above.
+
+## Updating the script with clasp (optional, from a computer)
+
+Instead of pasting by hand, you can push `apps-script/` straight to Google with [clasp](https://github.com/google/clasp), Google's command-line tool for Apps Script. One-time setup:
+
+1. Turn on **Google Apps Script API** at <https://script.google.com/home/usersettings>.
+2. Run `npx @google/clasp@3.4.1 login` and approve the sign-in with the account that owns the Sheet.
+3. In `apps-script/`, create `.clasp.json` with `{"scriptId": "<Script ID from Project Settings>", "rootDir": "", "scriptExtensions": [".gs"]}`.
+4. Run `npx @google/clasp@3.4.1 list-deployments` there, and save the ID of the numbered (`@N`) deployment, not `@HEAD`, into `apps-script/.deployment-id`.
+
+Both files are git-ignored: the deployment ID is the secret part of your sync URL, so never commit it.
+
+After that, every update is one command, and the sync URL stays the same:
+
+```
+npm run deploy:script -- "what changed"
+```
+
+To remove clasp's access later, go to your Google Account › Security › Third-party access, and delete `~/.clasprc.json`.
