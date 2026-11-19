@@ -163,3 +163,7 @@ setSilentMode(!!getSettings().silentSound);
 render();
 setInterval(render, 250);
 doSync();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
