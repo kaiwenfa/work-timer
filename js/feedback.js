@@ -4,8 +4,9 @@ let ctx;
 
 function synth(up) {
   try {
+    if (ctx && ctx.state === 'closed') ctx = undefined;
     ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running') ctx.resume(); // iOS may report 'suspended' or 'interrupted'
     const t0 = ctx.currentTime, out = ctx.createGain();
     out.gain.value = 0.22; out.connect(ctx.destination);
     // filtered saw sweep
